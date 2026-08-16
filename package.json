@@ -1,6 +1,6 @@
 {
   "name": "dsh-models-import",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "DeepSeek Harness plugin: import models with capabilities from an OpenAI-compatible /v1/models listing (gateway capability extensions) and edit per-model capabilities (thinking, vision) on its settings page",
   "type": "module",
   "license": "MIT",
