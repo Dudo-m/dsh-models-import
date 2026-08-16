@@ -30,26 +30,32 @@ DSH 自带的模型发现只读取 OpenAI 标准字段（`id`、`context_window`
 
 前提：机器上有 pnpm（没有就 `npm i -g pnpm`）。`dsh` CLI 不必预装——以下命令都用 npx 直接调。
 
-### 方式一：npx 远程安装（推荐，一条命令）
+### 方式一：npx 远程安装（推荐）
+
+**第 1 步**：执行安装命令（`dsh` CLI 无需预装，npx 会临时拉取）：
 
 ```sh
 npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
 ```
 
-git 安装拉取的是源码，首次 `add` 会因 pnpm 需要构建授权而失败，属正常现象。按错误提示把包键加入 web profile 的 `pnpm-workspace.yaml`（Windows 在 `C:\Users\<你>\.dsh\profiles\web\pnpm-workspace.yaml`，macOS/Linux 在 `~/.dsh/profiles/web/pnpm-workspace.yaml`）：
+**第 2 步**：首次执行会因 pnpm 构建授权失败（git 安装拉取的是源码，需要运行 `prepare` 构建脚本），这是预期行为。把**报错信息里给出的完整键**（形如 `dsh-models-import@https://codeload.github.com/Dudo-m/dsh-models-import/tar.gz/<commit-sha>`，每个 commit 不同，直接从你的报错里复制）加入 web profile 的 `pnpm-workspace.yaml`：
+
+- Windows：`C:\Users\<你>\.dsh\profiles\web\pnpm-workspace.yaml`
+- macOS / Linux：`~/.dsh/profiles/web/pnpm-workspace.yaml`
 
 ```yaml
 allowBuilds:
-  dsh-models-import: true
+  'dsh-models-import@https://codeload.github.com/Dudo-m/dsh-models-import/tar.gz/<commit-sha>': true
 ```
 
-然后**重新执行同一条安装命令**：
+**第 3 步**：重新执行第 1 步的同一条命令。看到 `+ dsh-models-import github:Dudo-m/dsh-models-import` 即安装成功（`prepare` 会在安装时自动完成构建）。
 
-```sh
-npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
-```
-
-看到 `+ dsh-models-import` 即安装成功。
+> 若重试时报 `ERR_PNPM_ENOENT ... dsh-models-import_tmp_...`（首次被拦截的尝试留下的残余状态），先卸载再重装一次即可：
+>
+> ```sh
+> npx -y @deepseek-ai/dsh plugin --profile web remove dsh-models-import
+> npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
+> ```
 
 > 请如实看待这项授权：它允许该包的代码在安装时于你的机器上执行构建。只对源码可信的仓库授权，并建议锁定 commit（`github:Dudo-m/dsh-models-import#<sha>`）。
 

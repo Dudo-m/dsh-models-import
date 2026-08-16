@@ -30,26 +30,32 @@ Stock dsh model discovery reads only the plain OpenAI fields (`id`, `context_win
 
 Prerequisites: pnpm (`npm i -g pnpm` if missing). The `dsh` CLI does not need to be installed globally — every command below goes through npx.
 
-### Option 1: remote install via npx (recommended, one command)
+### Option 1: remote install via npx (recommended)
+
+**Step 1** — run the install command (no global `dsh` needed; npx fetches it):
 
 ```sh
 npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
 ```
 
-A git install pulls sources, so the first `add` fails while pnpm waits for build approval — that is expected. Add the package key to the web profile's `pnpm-workspace.yaml` (`~/.dsh/profiles/web/pnpm-workspace.yaml`) as the error suggests:
+**Step 2** — the first run fails while pnpm waits for build approval (a git install pulls sources and must run the `prepare` build script). That is expected. Copy the **exact key from your own error message** (it looks like `dsh-models-import@https://codeload.github.com/Dudo-m/dsh-models-import/tar.gz/<commit-sha>` — the key embeds the commit, so copy it verbatim) into the web profile's `pnpm-workspace.yaml`:
+
+- Windows: `C:\Users\<you>\.dsh\profiles\web\pnpm-workspace.yaml`
+- macOS / Linux: `~/.dsh/profiles/web/pnpm-workspace.yaml`
 
 ```yaml
 allowBuilds:
-  dsh-models-import: true
+  'dsh-models-import@https://codeload.github.com/Dudo-m/dsh-models-import/tar.gz/<commit-sha>': true
 ```
 
-then **re-run the same install command**:
+**Step 3** — re-run the same command from step 1. A `+ dsh-models-import github:Dudo-m/dsh-models-import` line means it installed (`prepare` builds automatically during install).
 
-```sh
-npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
-```
-
-A `+ dsh-models-import` line means it installed.
+> If the retry fails with `ERR_PNPM_ENOENT ... dsh-models-import_tmp_...` (leftover state from the first, blocked attempt), remove and re-add once:
+>
+> ```sh
+> npx -y @deepseek-ai/dsh plugin --profile web remove dsh-models-import
+> npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
+> ```
 
 > Take the approval seriously: it allows the package's code to run a build on your machine at install time. Only approve repositories you trust, and pin a commit (`github:Dudo-m/dsh-models-import#<sha>`).
 
