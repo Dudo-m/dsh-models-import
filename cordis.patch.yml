@@ -1,0 +1,18 @@
+# dsh-models-import composition layer.
+#
+# The insert mounts the host half: the /plugins/models-import HTTP route the
+# extended "fetch available models" action interrogates. The browser half is
+# discovered through this package's `dsh.client` declaration once the entry is
+# enabled.
+#
+# The disable withdraws the stock Models settings page: this package ships a
+# vendored, capability-extended copy of it (same section id, same onboarding
+# entries), and both would register if the stock row stayed enabled. Remove the
+# disable to fall back to the stock page (the host route then serves nothing
+# the stock UI reads).
+- insert:
+    - id: models-import
+      name: dsh-models-import
+
+- id: ui-settings-models
+  disabled: true

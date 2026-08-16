@@ -1,0 +1,42 @@
+/*
+Vendored and modified from @deepseek-ai/dsh-client-ui-settings-models
+(https://github.com/deepseek-ai/deepseek-harness, MIT License, Copyright (c) DeepSeek)
+by dsh-models-import: capability-aware fetch + per-model capability editing.
+See the repository LICENSE (third-party notice) for attribution details.
+*/
+.copy {
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.copy p {
+  margin: 0;
+}
+
+.copy p + p {
+  margin-top: 12px;
+}
+
+.error {
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.primary {
+  min-width: 120px;
+}
+
+@media (max-width: 560px) {
+  .primary {
+    width: 100%;
+  }
+}
