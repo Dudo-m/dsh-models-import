@@ -28,42 +28,58 @@ Stock dsh model discovery reads only the plain OpenAI fields (`id`, `context_win
 
 ## Install
 
-Prerequisites: pnpm (`npm i -g pnpm`). The `dsh` CLI does not need to be installed globally — npx works:
+Prerequisites: pnpm (`npm i -g pnpm` if missing). The `dsh` CLI does not need to be installed globally — every command below goes through npx.
 
-### From GitHub (recommended)
+### Option 1: remote install via npx (recommended, one command)
 
 ```sh
-npx -y @deepseek-ai/dsh plugin --profile web add github:<you>/dsh-models-import
+npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
 ```
 
-A git install pulls sources, so the first `add` fails while pnpm waits for build approval. Put the package key into the profile's `pnpm-workspace.yaml` (`~/.dsh/profiles/web`) as the error suggests, then re-run:
+A git install pulls sources, so the first `add` fails while pnpm waits for build approval — that is expected. Add the package key to the web profile's `pnpm-workspace.yaml` (`~/.dsh/profiles/web/pnpm-workspace.yaml`) as the error suggests:
 
 ```yaml
 allowBuilds:
   dsh-models-import: true
 ```
 
-> Take the approval seriously: it allows the package's code to run a build on your machine at install time. Only approve repositories you trust, and pin a commit (`github:<user>/dsh-models-import#<sha>`).
-
-### From a local checkout (development)
+then **re-run the same install command**:
 
 ```sh
-git clone https://github.com/<you>/dsh-models-import
+npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
+```
+
+A `+ dsh-models-import` line means it installed.
+
+> Take the approval seriously: it allows the package's code to run a build on your machine at install time. Only approve repositories you trust, and pin a commit (`github:Dudo-m/dsh-models-import#<sha>`).
+
+### Option 2: local clone (development)
+
+```sh
+git clone https://github.com/Dudo-m/dsh-models-import
 cd dsh-models-import
 pnpm install && pnpm run build
 
 npx -y @deepseek-ai/dsh plugin --profile web add .
 ```
 
-`dsh plugin` records it as a `link:` dependency in the web profile (`~/.dsh/profiles/web`) and appends it to `dsh.profile.bundles`. Or ship a tarball via `pnpm pack` and install `npx -y @deepseek-ai/dsh plugin --profile web add ./dsh-models-import-0.1.0.tgz` (no build approval needed).
+`dsh plugin` records it as a `link:` dependency in the web profile (`~/.dsh/profiles/web`) and appends it to `dsh.profile.bundles`; update later with `git pull && pnpm run build` inside the clone.
 
-### Start
+### Option 3: tarball (no build approval needed)
+
+Run `pnpm pack` inside a clone, then:
+
+```sh
+npx -y @deepseek-ai/dsh plugin --profile web add ./dsh-models-import-0.1.0.tgz
+```
+
+### Start / verify
 
 ```sh
 npx -y @deepseek-ai/dsh web
 ```
 
-Open http://127.0.0.1:3080 → Settings → Models.
+Open http://127.0.0.1:3080 → Settings → Models — if the page renders, the plugin took over (restart a running server once so the new plugin loads).
 
 ## Uninstall
 

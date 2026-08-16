@@ -28,48 +28,66 @@ DSH 自带的模型发现只读取 OpenAI 标准字段（`id`、`context_window`
 
 ## 安装
 
-前提：机器上有 pnpm（`npm i -g pnpm`）。`dsh` CLI 不必预装——用 npx 直接调：
+前提：机器上有 pnpm（没有就 `npm i -g pnpm`）。`dsh` CLI 不必预装——以下命令都用 npx 直接调。
 
-### 从 GitHub 安装（推荐）
+### 方式一：npx 远程安装（推荐，一条命令）
 
 ```sh
-npx -y @deepseek-ai/dsh plugin --profile web add github:<你的用户名>/dsh-models-import
+npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
 ```
 
-git 安装拉取的是源码，首次 `add` 会因 pnpm 需要构建授权而失败。按错误提示把包键加入 profile 的 `pnpm-workspace.yaml`（`~/.dsh/profiles/web`）后重试：
+git 安装拉取的是源码，首次 `add` 会因 pnpm 需要构建授权而失败，属正常现象。按错误提示把包键加入 web profile 的 `pnpm-workspace.yaml`（Windows 在 `C:\Users\<你>\.dsh\profiles\web\pnpm-workspace.yaml`，macOS/Linux 在 `~/.dsh/profiles/web/pnpm-workspace.yaml`）：
 
 ```yaml
 allowBuilds:
   dsh-models-import: true
 ```
 
-> 请如实看待这项授权：它允许该包的代码在安装时于你的机器上执行构建。只对源码可信的仓库授权，并建议锁定 commit（`github:<user>/dsh-models-import#<sha>`）。
-
-### 从本地目录安装（开发）
+然后**重新执行同一条安装命令**：
 
 ```sh
-git clone https://github.com/<你的用户名>/dsh-models-import
+npx -y @deepseek-ai/dsh plugin --profile web add github:Dudo-m/dsh-models-import
+```
+
+看到 `+ dsh-models-import` 即安装成功。
+
+> 请如实看待这项授权：它允许该包的代码在安装时于你的机器上执行构建。只对源码可信的仓库授权，并建议锁定 commit（`github:Dudo-m/dsh-models-import#<sha>`）。
+
+### 方式二：本地 clone 安装（开发）
+
+```sh
+git clone https://github.com/Dudo-m/dsh-models-import
 cd dsh-models-import
 pnpm install && pnpm run build
 
 npx -y @deepseek-ai/dsh plugin --profile web add .
 ```
 
-`dsh plugin` 会把它以 `link:` 依赖写进 web profile（`~/.dsh/profiles/web`），并追加到 `dsh.profile.bundles`。也可以先 `pnpm pack` 交付 tarball：`npx -y @deepseek-ai/dsh plugin --profile web add ./dsh-models-import-0.1.0.tgz`（无需构建授权）。
+`dsh plugin` 会把它以 `link:` 依赖写进 web profile（`~/.dsh/profiles/web`），并追加到 `dsh.profile.bundles`；以后在 clone 目录里 `git pull && pnpm run build` 即可更新。
 
-### 启动
+### 方式三：tarball 安装（无需构建授权）
+
+在 clone 目录里执行 `pnpm pack`，然后：
+
+```sh
+npx -y @deepseek-ai/dsh plugin --profile web add ./dsh-models-import-0.1.0.tgz
+```
+
+### 启动 / 验证
 
 ```sh
 npx -y @deepseek-ai/dsh web
 ```
 
-打开 http://127.0.0.1:3080 → 设置 → 模型。
+打开 http://127.0.0.1:3080 → 设置 → 模型：页面正常显示即插件已接管（若之前服务在跑，需重启一次让新插件加载）。
 
 ## 卸载
 
 ```sh
 npx -y @deepseek-ai/dsh plugin --profile web remove dsh-models-import
 ```
+
+重启 `dsh web` 后恢复官方「模型」页面。已经写进 `settings.yaml` 的模型与能力字段都是标准 llm-pi-ai 配置，卸载后依然有效（只是回到官方编辑器，能力字段需手改 YAML）。
 
 依赖与组合层会一并移除，重启 `dsh web` 后恢复官方「模型」页面。已经写进 `settings.yaml` 的模型与能力字段都是标准 llm-pi-ai 配置，卸载后依然有效（只是回到官方编辑器，能力字段需手改 YAML）。
 

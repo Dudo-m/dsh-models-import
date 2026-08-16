@@ -6,10 +6,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-name/dsh-models-import.git"
+    "url": "git+https://github.com/Dudo-m/dsh-models-import.git"
   },
   "bugs": {
-    "url": "https://github.com/your-name/dsh-models-import/issues"
+    "url": "https://github.com/Dudo-m/dsh-models-import/issues"
   },
   "keywords": [
     "deepseek-harness",
