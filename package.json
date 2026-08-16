@@ -4,6 +4,9 @@
   "description": "DeepSeek Harness plugin: import models with capabilities from an OpenAI-compatible /v1/models listing (gateway capability extensions) and edit per-model capabilities (thinking, vision) on its settings page",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Dudo-m/dsh-models-import.git"

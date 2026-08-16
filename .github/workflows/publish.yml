@@ -1,0 +1,53 @@
+# Publishes to npm on every version tag. npm users install prebuilt code —
+# no prepare, no pnpm build-script approval, one command.
+#
+# One-time setup: add an npm automation token as the NPM_TOKEN secret
+# (GitHub → Settings → Secrets and variables → Actions), then:
+#
+#   npm version patch   # or minor / major
+#   git push --follow-tags
+#
+name: publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish to npm
+        # pnpm publish runs the `prepare` script (tsdown build) automatically,
+        # so the tarball ships with lib/ and installs without any build step.
+        run: pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Attach tarball to the GitHub release
+        run: |
+          pnpm pack
+          # A pushed tag carries no release; create one (notes from commits) if
+          # it does not exist yet, then upload the tarball.
+          gh release create "${GITHUB_REF_NAME}" --generate-notes --title "${GITHUB_REF_NAME}" || true
+          gh release upload "${GITHUB_REF_NAME}" dsh-models-import-*.tgz --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

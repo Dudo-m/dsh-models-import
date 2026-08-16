@@ -28,9 +28,21 @@ Stock dsh model discovery reads only the plain OpenAI fields (`id`, `context_win
 
 ## Install
 
-Prerequisites: pnpm (`npm i -g pnpm` if missing). The `dsh` CLI does not need to be installed globally — every command below goes through npx.
+The `dsh` CLI does not need to be installed globally — every command below goes through npx.
 
-### Option 1: remote install via npx (recommended)
+### Option 1: npm install (recommended — one command, no approvals)
+
+The npm package ships prebuilt, so installing runs no build scripts at all:
+
+```sh
+npx -y @deepseek-ai/dsh plugin --profile web add dsh-models-import
+```
+
+Restart `dsh web` to activate. Upgrades are the same one command: `... add dsh-models-import@latest`.
+
+### Option 2: install from GitHub (sources; needs build approval)
+
+Prerequisites: pnpm (`npm i -g pnpm` if missing).
 
 **Step 1** — run the install command (no global `dsh` needed; npx fetches it):
 
@@ -59,7 +71,7 @@ allowBuilds:
 
 > Take the approval seriously: it allows the package's code to run a build on your machine at install time. Only approve repositories you trust, and pin a commit (`github:Dudo-m/dsh-models-import#<sha>`).
 
-### Option 2: local clone (development)
+### Option 3: local clone (development)
 
 ```sh
 git clone https://github.com/Dudo-m/dsh-models-import
@@ -71,13 +83,15 @@ npx -y @deepseek-ai/dsh plugin --profile web add .
 
 `dsh plugin` records it as a `link:` dependency in the web profile (`~/.dsh/profiles/web`) and appends it to `dsh.profile.bundles`; update later with `git pull && pnpm run build` inside the clone.
 
-### Option 3: tarball (no build approval needed)
+### Option 4: tarball (no build approval needed)
 
-Run `pnpm pack` inside a clone, then:
+Each release carries a prebuilt tarball on GitHub; install straight from the download URL:
 
 ```sh
-npx -y @deepseek-ai/dsh plugin --profile web add ./dsh-models-import-0.1.0.tgz
+npx -y @deepseek-ai/dsh plugin --profile web add https://github.com/Dudo-m/dsh-models-import/releases/download/v0.1.0/dsh-models-import-0.1.0.tgz
 ```
+
+You can also `pnpm pack` inside a clone and install from the local path.
 
 ### Start / verify
 
@@ -109,6 +123,29 @@ To temporarily return to the stock page while keeping the plugin installed, dele
 3. pick models in the dialog; badges show what the endpoint reported (thinking / vision / tools / search);
 4. expand any row to edit: the thinking toggle, thinking levels (off…max), image input, display name, context window, max output;
 5. saving writes `llm-pi-ai.providers.<route>.models` in `settings.yaml`; the next request picks it up (no restart).
+
+## Releasing (maintainer)
+
+Publishing to npm is what gives users the zero-approval install. Automated flow:
+
+1. add `NPM_TOKEN` under the GitHub repo's Settings → Secrets → Actions (from npmjs.com → Access Tokens → Automation);
+2. cut a release:
+
+```sh
+npm version patch      # or minor / major
+git push --follow-tags
+```
+
+The tag triggers [.github/workflows/publish.yml](.github/workflows/publish.yml): build, publish to npm, and attach the tarball to the GitHub release.
+
+A one-off manual publish works too (`prepare` builds automatically):
+
+```sh
+npm login
+npm publish
+```
+
+> If the npm name `dsh-models-import` is taken, rename the package to `@dudo-m/dsh-models-import` (scope = your npm username) and adjust the publish/install commands accordingly.
 
 ## Development
 
