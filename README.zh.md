@@ -40,6 +40,12 @@ npx -y @deepseek-ai/dsh plugin --profile web add dsh-models-import
 
 重启 `dsh web` 即生效。升级同样一条命令：`... add dsh-models-import@latest`。
 
+> **国内镜像用户注意**：如果 pnpm 默认源是 npmmirror.com，新发布的包要过一阵才同步；安装报 `404` 或 `No matching version` 时显式指定官方源即可：
+>
+> ```sh
+> npx -y @deepseek-ai/dsh plugin --profile web add dsh-models-import --registry=https://registry.npmjs.org
+> ```
+
 ### 方式二：从 GitHub 安装（源码方式，需要构建授权）
 
 **第 1 步**：执行安装命令（前提：机器上有 pnpm，没有就 `npm i -g pnpm`）：

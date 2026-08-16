@@ -40,6 +40,12 @@ npx -y @deepseek-ai/dsh plugin --profile web add dsh-models-import
 
 Restart `dsh web` to activate. Upgrades are the same one command: `... add dsh-models-import@latest`.
 
+> **Mirror-registry users** (e.g. npmmirror.com): a freshly published package takes a while to sync; if the install reports `404` or `No matching version`, pin the official registry for the install:
+>
+> ```sh
+> npx -y @deepseek-ai/dsh plugin --profile web add dsh-models-import --registry=https://registry.npmjs.org
+> ```
+
 ### Option 2: install from GitHub (sources; needs build approval)
 
 Prerequisites: pnpm (`npm i -g pnpm` if missing).
