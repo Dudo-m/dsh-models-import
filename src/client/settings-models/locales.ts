@@ -4,12 +4,10 @@
 // See the repository LICENSE (third-party notice) for attribution details.
 /** Copy dictionaries for the Models settings section. */
 
-import { WELCOME_NOTICE_COPY } from './onboarding-copy.ts'
-
 /** English strings (the key-set source of truth for this pair). */
 export const en = {
-  nav: 'Models',
-  title: 'Models',
+  nav: 'Models Pro',
+  title: 'Models Pro',
   intro: 'Enter your API keys to use models from the following providers.',
   edit: 'Edit',
   editProvider: 'Edit {provider}',
@@ -91,16 +89,6 @@ export const en = {
   customNeedsModels: 'A custom provider needs at least one model.',
   create: 'Create provider',
   creating: 'Creating\u2026',
-  welcomeTitle: WELCOME_NOTICE_COPY.en.title,
-  welcomeBody: WELCOME_NOTICE_COPY.en.body,
-  welcomeContinue: WELCOME_NOTICE_COPY.en.continueLabel,
-  welcomeError: 'The acknowledgement could not be saved. Please try again.',
-  onboardingTitle: 'Add an API key to get started',
-  onboardingDescription: 'Configure the official DeepSeek provider to start building.',
-  onboardingLater: 'Configure later',
-  onboardingSave: 'Save and continue',
-  onboardingSaving: 'Saving…',
-  keyRequired: 'Enter an API key to continue.',
   modelCapabilities: 'Capabilities',
   thinkingToggle: 'Can think',
   thinkingToggleHint: 'When on, model pickers offer thinking levels for this model.',
@@ -112,6 +100,7 @@ export const en = {
   capTools: 'tools',
   capSearch: 'search',
   fetchCapsUnavailable: 'Capability lookup failed ({error}); imported ids and capacities only.',
+  keyRequired: 'Enter an API key to continue.',
 }
 
 /** The settings.models namespace key union. */
@@ -119,8 +108,8 @@ export type ModelsKey = keyof typeof en
 
 /** Chinese strings (same keys as {@link en}). */
 export const zh: { [Key in keyof typeof en]: string } = {
-  nav: '模型',
-  title: '模型',
+  nav: '模型Pro',
+  title: '模型Pro',
   intro: '填入各提供方的 API 密钥即可使用其模型。',
   edit: '编辑',
   editProvider: '编辑 {provider}',
@@ -202,16 +191,6 @@ export const zh: { [Key in keyof typeof en]: string } = {
   customNeedsModels: '自定义提供方至少需要一个模型。',
   create: '创建提供方',
   creating: '创建中\u2026',
-  welcomeTitle: WELCOME_NOTICE_COPY.zh.title,
-  welcomeBody: WELCOME_NOTICE_COPY.zh.body,
-  welcomeContinue: WELCOME_NOTICE_COPY.zh.continueLabel,
-  welcomeError: '暂时无法保存确认状态，请重试。',
-  onboardingTitle: '添加一个 API Key 开始使用',
-  onboardingDescription: '配置 DeepSeek 官方模型，即可开始使用。',
-  onboardingLater: '稍后配置',
-  onboardingSave: '保存并继续',
-  onboardingSaving: '保存中…',
-  keyRequired: '请输入 API 密钥后继续。',
   modelCapabilities: '能力',
   thinkingToggle: '可思考',
   thinkingToggleHint: '开启后，模型选择器会为该模型提供思考档位。',
@@ -223,4 +202,5 @@ export const zh: { [Key in keyof typeof en]: string } = {
   capTools: '工具',
   capSearch: '搜索',
   fetchCapsUnavailable: '能力获取失败（{error}），仅导入 ID 与容量。',
+  keyRequired: '请输入 API 密钥后继续。',
 }

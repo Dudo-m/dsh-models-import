@@ -2,9 +2,9 @@
 
 English | [中文](README.zh.md)
 
-A DeepSeek Harness (DSH) plugin that upgrades the **Models** settings page for custom providers:
+A DeepSeek Harness (DSH) plugin that adds a "**Models Pro**" settings section with **capability-aware model import and editing** — the stock Models section stays untouched.
 
-- "Fetch available models" now recognizes the `capabilities` extensions OpenAI-compatible gateways return in `/v1/models` (vision, reasoning/thinking, tools, search, thinking dialect, …) and adopts them into the imported model entries;
+- "Fetch available models" recognizes the `capabilities` extensions OpenAI-compatible gateways return in `/v1/models` (vision, reasoning/thinking, tools, search, thinking dialect, …) and adopts them into the imported model entries;
 - a model row's disclosure edits more than capacities — **can-think (with thinking levels)** and **accepts images** are editable beside context window and max output.
 
 ## The problem it solves
@@ -12,7 +12,7 @@ A DeepSeek Harness (DSH) plugin that upgrades the **Models** settings page for c
 Stock dsh model discovery reads only the plain OpenAI fields (`id`, `context_window`, `max_output_tokens`) and drops the gateway `capabilities` object; the stock row editor edits capacities only. This plugin:
 
 1. **Host half** registers `POST /plugins/models-import/models` on the web server, fetches `<baseURL>/models` for you (resolving the provider's stored credential), parses `capabilities`, and maps them to `llm-pi-ai` model fields;
-2. **Browser half** replaces the stock Models settings page with a vendored, extended copy (same place, same features, plus the extensions); the stock page is disabled through the composition layer, so nothing renders twice.
+2. **Browser half** adds a "Models Pro" settings section (built on an extended copy of the stock page): the same provider cards and editors plus capability-aware fetch and per-model capability editing. The stock Models section keeps running the official implementation — both pages edit the same `settings.yaml`, so you can switch back at any time.
 
 ### Capability mapping
 
@@ -105,7 +105,7 @@ You can also `pnpm pack` inside a clone and install from the local path.
 npx -y @deepseek-ai/dsh web
 ```
 
-Open http://127.0.0.1:3080 → Settings → Models — if the page renders, the plugin took over (restart a running server once so the new plugin loads).
+Open http://127.0.0.1:3080 → Settings: seeing both **Models** and **Models Pro** means the plugin loaded (restart a running server once so the new plugin loads).
 
 ## Uninstall
 
@@ -113,18 +113,11 @@ Open http://127.0.0.1:3080 → Settings → Models — if the page renders, the 
 npx -y @deepseek-ai/dsh plugin --profile web remove dsh-models-import
 ```
 
-The dependency and composition layer go with it; restart `dsh web` and the stock Models page is back. Model entries and capability fields already written to `settings.yaml` are ordinary llm-pi-ai configuration — they keep working (the stock editor just shows them as unknown fields).
-
-To temporarily return to the stock page while keeping the plugin installed, delete this row from the package's `cordis.patch.yml`:
-
-```yaml
-- id: ui-settings-models
-  disabled: true
-```
+The Models Pro section goes with it; the stock Models section was never touched. Model entries and capability fields already written to `settings.yaml` are ordinary llm-pi-ai configuration — they keep working (the stock editor just shows them as unknown fields).
 
 ## Use
 
-1. Settings → Models → edit a custom provider (or create one);
+1. Settings → **Models Pro** → edit a custom provider (or create one);
 2. click "Fetch available models" — the request first takes this plugin's capability-aware route, falling back to stock discovery (with a note) when it cannot answer;
 3. pick models in the dialog; badges show what the endpoint reported (thinking / vision / tools / search);
 4. expand any row to edit: the thinking toggle, thinking levels (off…max), image input, display name, context window, max output;
