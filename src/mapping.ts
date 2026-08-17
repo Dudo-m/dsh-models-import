@@ -57,6 +57,7 @@ interface RawCapabilities {
   thinking?: unknown
   agentic?: unknown
   tools?: unknown
+  tool_calling?: unknown
   search?: unknown
   pdf?: unknown
   audioInput?: unknown
@@ -65,6 +66,8 @@ interface RawCapabilities {
   audioOutput?: unknown
   thinkingFormat?: unknown
   thinkingCanDisable?: unknown
+  supportsThinking?: unknown
+  effort_tiers?: unknown
   thinkingRange?: unknown
   contextWindow?: unknown
   maxOutput?: unknown
@@ -77,6 +80,10 @@ interface RawListingEntry {
   object?: unknown
   owned_by?: unknown
   capabilities?: unknown
+  /** Top-level gateway fields (display name, kind, modalities). */
+  name?: unknown
+  type?: unknown
+  input_modalities?: unknown
   context_length?: unknown
   context_window?: unknown
   max_completion_tokens?: unknown
@@ -113,6 +120,7 @@ export interface CapabilityModel {
 /** The llm-pi-ai model-entry fields this plugin produces. */
 export interface ModelEntryDraft {
   id: string
+  name?: string
   contextWindow?: number
   maxTokens?: number
   /** `['text', 'image']` when the gateway reports vision. */
@@ -151,28 +159,46 @@ function flag(value: unknown): boolean | undefined {
 export function mapEntry(raw: RawListingEntry): CapabilityModel | undefined {
   const id = label(raw.id)
   if (id === undefined) return undefined
+  // A video-generation route is not a chat model; importing it would put an
+  // unusable entry in every model picker.
+  if (label(raw.type) === 'video') return undefined
   const capsRaw = (raw.capabilities ?? {}) as RawCapabilities
+  const name = label(raw.name)
+  // Vision: the explicit flag, or an OpenRouter-style `input_modalities` list
+  // naming `image` (either spelling — some routes carry only one of the two).
+  const inputModalities = Array.isArray(raw.input_modalities)
+    ? raw.input_modalities.filter((m): m is string => typeof m === 'string')
+    : undefined
   const vision = flag(capsRaw.vision) === true
+    || inputModalities?.includes('image') === true
   // Gateways report the thinking capability as `reasoning` for some routes
   // and `thinking` for others; either spelling means the model can think.
   const reasoning = flag(capsRaw.reasoning) === true || flag(capsRaw.thinking) === true
   const thinkingFormat = label(capsRaw.thinkingFormat)
-  const thinkingCanDisable = flag(capsRaw.thinkingCanDisable)
+  // "Thinking can be turned off": `thinkingCanDisable` and the
+  // OpenRouter-style `supportsThinking` say the same thing.
+  const thinkingCanDisable = flag(capsRaw.thinkingCanDisable) ?? flag(capsRaw.supportsThinking)
   const contextWindow = capacity(capsRaw.contextWindow, raw.context_window, raw.context_length)
   const maxTokens = capacity(capsRaw.maxOutput, raw.max_output_tokens, raw.max_completion_tokens, raw.max_tokens)
 
   const entry: ModelEntryDraft = {
     id,
+    ...name === undefined ? {} : { name },
     ...contextWindow === undefined ? {} : { contextWindow },
     ...maxTokens === undefined ? {} : { maxTokens },
     ...vision ? { input: ['text', 'image'] as ('text' | 'image')[] } : {},
   }
   if (reasoning) {
-    // Default offer: plain `high`, plus `off` when the gateway says thinking
-    // is optional — the levels stay editable per model on the settings page.
-    const efforts: Record<string, string | null> = thinkingCanDisable === true
-      ? { off: null, high: 'high' }
-      : { high: 'high' }
+    // Offer exactly the levels the gateway advertised when it names an
+    // `effort_tiers` list (`none` is the `off` spelling); otherwise default
+    // to plain `high`, plus `off` when the gateway says thinking is optional.
+    // The levels stay editable per model on the settings page either way.
+    const advertised = advertisedLevels(capsRaw.effort_tiers)
+    const efforts: Record<string, string | null> = advertised !== undefined
+      ? Object.fromEntries(advertised.map(level => [level, level === 'off' ? null : level]))
+      : thinkingCanDisable === true
+        ? { off: null, high: 'high' }
+        : { high: 'high' }
     entry.reasoningEfforts = efforts
     if (thinkingFormat !== undefined && NAMEABLE_THINKING_FORMATS.has(thinkingFormat)) {
       entry.compat = { thinkingFormat }
@@ -185,13 +211,30 @@ export function mapEntry(raw: RawListingEntry): CapabilityModel | undefined {
     caps: {
       vision,
       reasoning,
-      tools: flag(capsRaw.tools) === true || flag(capsRaw.agentic) === true,
+      tools: flag(capsRaw.tools) === true || flag(capsRaw.agentic) === true || flag(capsRaw.tool_calling) === true,
       search: flag(capsRaw.search) === true,
       ...thinkingFormat === undefined ? {} : { thinkingFormat },
       ...thinkingCanDisable === undefined ? {} : { thinkingCanDisable },
     },
     entry,
   }
+}
+
+/**
+ * Narrow a gateway `effort_tiers` list into the pi-ai level vocabulary:
+ * `none` is the `off` spelling, unknown words and non-strings drop, and a
+ * list with nothing nameable left answers `undefined` (fall back to the
+ * default offer) rather than an empty declaration.
+ */
+function advertisedLevels(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const mapped = new Set<string>()
+  for (const tier of value) {
+    if (typeof tier !== 'string') continue
+    const level = tier === 'none' ? 'off' : tier
+    if ((THINKING_LEVELS as readonly string[]).includes(level)) mapped.add(level)
+  }
+  return mapped.size > 0 ? [...mapped] : undefined
 }
 
 /**
