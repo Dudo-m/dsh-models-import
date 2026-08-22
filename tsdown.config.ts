@@ -71,7 +71,7 @@ export default defineConfig([
     sourcemap: false,
     // clean must stay off: it would wipe the node-half output emitted above.
     clean: false,
-    external: [...PLATFORM_EXTERNALS],
+    deps: { neverBundle: [...PLATFORM_EXTERNALS] },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
       'import.meta.env.MODE': JSON.stringify(process.env.NODE_ENV ?? 'production'),
